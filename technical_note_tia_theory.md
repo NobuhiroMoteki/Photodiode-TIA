@@ -66,7 +66,7 @@ Z_{TI}(s) \equiv \frac{V_{\text{out}}(s)}{I_{pd}(s)}.
 $R_f$ and $C_f$ are in parallel:
 
 ```math
-Z_f = R_f \;\|\; \frac{1}{sC_f} = \frac{R_f}{1 + sR_fC_f}.
+Z_f = R_f \;\|\; \frac{1}{sC_f} = \frac{R_f}{1 + sR_fC_f} \tag{2.1}.
 ```
 
 ### Step 2: Opamp constraint
@@ -80,7 +80,7 @@ V_{\text{out}} = -A(s) \cdot V^{-} = -\frac{\omega_c}{s} \, V^{-}
 Solving for $V^-$:
 
 ```math
-V^{-} = -\frac{s}{\omega_c}\,V_{\text{out}}.
+V^{-} = -\frac{s}{\omega_c}\,V_{\text{out}} \tag{2.2}.
 ```
 
 ### Step 3: Kirchhoff's current law at the inverting node
@@ -102,7 +102,7 @@ Note the sign convention: current flowing from the node through $Z_f$ toward $V_
 is $(V^{-} - V_{\text{out}})/Z_f$. Rearranging with current into the node on the left:
 
 ```math
-I_{pd} = \frac{V_{\text{out}} - V^{-}}{Z_f} - V^{-} \cdot s(C_i + C_s).
+I_{pd} = \frac{V_{\text{out}} - V^{-}}{Z_f} - V^{-} \cdot s(C_i + C_s) \tag{2.3}.
 ```
 
 ### Step 4: Substitute the opamp constraint
@@ -112,19 +112,19 @@ Substitute (2.1) and (2.2) into (2.3).
 First, compute $V_{\text{out}} - V^-$:
 
 ```math
-V_{\text{out}} - V^{-} = V_{\text{out}} - \left(-\frac{s}{\omega_c}V_{\text{out}}\right) = V_{\text{out}}\left(1 + \frac{s}{\omega_c}\right) = V_{\text{out}} \cdot \frac{\omega_c + s}{\omega_c}
+V_{\text{out}} - V^{-} = V_{\text{out}} - \left(-\frac{s}{\omega_c}V_{\text{out}}\right) = V_{\text{out}}\left(1 + \frac{s}{\omega_c}\right) = V_{\text{out}} \cdot \frac{\omega_c + s}{\omega_c} \tag{2.4}
 ```
 
 Substitute into the feedback current term:
 
 ```math
-\frac{V_{\text{out}} - V^{-}}{Z_f} = V_{\text{out}} \cdot \frac{\omega_c + s}{\omega_c} \cdot \frac{1 + sR_fC_f}{R_f}
+\frac{V_{\text{out}} - V^{-}}{Z_f} = V_{\text{out}} \cdot \frac{\omega_c + s}{\omega_c} \cdot \frac{1 + sR_fC_f}{R_f} \tag{2.5}
 ```
 
 The shunt capacitance current term:
 
 ```math
--V^{-} \cdot s(C_i + C_s) = \frac{s}{\omega_c}V_{\text{out}} \cdot s(C_i + C_s) = \frac{s^2 (C_i + C_s)}{\omega_c}\,V_{\text{out}}.
+-V^{-} \cdot s(C_i + C_s) = \frac{s}{\omega_c}V_{\text{out}} \cdot s(C_i + C_s) = \frac{s^2 (C_i + C_s)}{\omega_c}\,V_{\text{out}} \tag{2.6}.
 ```
 
 ### Step 5: Combine
@@ -138,7 +138,7 @@ I_{pd} = V_{\text{out}} \left[\frac{(\omega_c + s)(1 + sR_fC_f)}{\omega_c R_f} +
 Factor out $1/\omega_c$:
 
 ```math
-I_{pd} = \frac{V_{\text{out}}}{\omega_c}\left[\frac{(\omega_c + s)(1 + sR_fC_f)}{R_f} + s^2(C_i + C_s)\right].
+I_{pd} = \frac{V_{\text{out}}}{\omega_c}\left[\frac{(\omega_c + s)(1 + sR_fC_f)}{R_f} + s^2(C_i + C_s)\right] \tag{2.7}.
 ```
 
 ### Step 6: Expand the product
@@ -150,7 +150,7 @@ I_{pd} = \frac{V_{\text{out}}}{\omega_c}\left[\frac{(\omega_c + s)(1 + sR_fC_f)}
 Rearranging in powers of $s$:
 
 ```math
-= s^2 R_f C_f + s(1 + \omega_c R_f C_f) + \omega_c.
+= s^2 R_f C_f + s(1 + \omega_c R_f C_f) + \omega_c \tag{2.8}.
 ```
 
 ### Step 7: Divide by $R_f$ and add the shunt term
@@ -164,7 +164,7 @@ Rearranging in powers of $s$:
 ```
 
 ```math
-= s^2(C_i + C_f + C_s) + s\,\frac{1 + \omega_c R_f C_f}{R_f} + \frac{\omega_c}{R_f}.
+= s^2(C_i + C_f + C_s) + s\,\frac{1 + \omega_c R_f C_f}{R_f} + \frac{\omega_c}{R_f} \tag{2.9}.
 ```
 
 ### Step 8: Form the transfer function
@@ -176,7 +176,7 @@ I_{pd} = \frac{V_{\text{out}}}{\omega_c}\left[s^2(C_i + C_f + C_s) + s\,\frac{1 
 ```
 
 ```math
-Z_{TI}(s) = \frac{V_{\text{out}}}{I_{pd}} = \frac{\omega_c}{s^2(C_i + C_f + C_s) + s\,\frac{1 + \omega_c R_f C_f}{R_f} + \frac{\omega_c}{R_f}}.
+Z_{TI}(s) = \frac{V_{\text{out}}}{I_{pd}} = \frac{\omega_c}{s^2(C_i + C_f + C_s) + s\,\frac{1 + \omega_c R_f C_f}{R_f} + \frac{\omega_c}{R_f}} \tag{2.10}.
 ```
 
 (The overall sign is negative for the inverting configuration; we write the magnitude here
@@ -193,17 +193,17 @@ H(s) = \frac{K\,\omega_n^2}{s^2 + 2\zeta\omega_n\,s + \omega_n^2}
 Dividing numerator and denominator of (2.10) by $(C_i + C_f + C_s)$:
 
 ```math
-Z_{TI}(s) = \frac{\frac{\omega_c}{C_i + C_f + C_s}}{s^2 + \frac{1 + \omega_c R_f C_f}{R_f(C_i + C_f + C_s)}\,s + \frac{\omega_c}{R_f(C_i + C_f + C_s)}}
+Z_{TI}(s) = \frac{\frac{\omega_c}{C_i + C_f + C_s}}{s^2 + \frac{1 + \omega_c R_f C_f}{R_f(C_i + C_f + C_s)}\,s + \frac{\omega_c}{R_f(C_i + C_f + C_s)}} \tag{2.11}
 ```
 
 By comparison with the standard form, we identify:
 
 ```math
-\omega_n^2 = \frac{\omega_c}{R_f(C_i + C_f + C_s)}.
+\omega_n^2 = \frac{\omega_c}{R_f(C_i + C_f + C_s)} \tag{2.12}.
 ```
 
 ```math
-2\zeta\omega_n = \frac{1 + \omega_c R_f C_f}{R_f(C_i + C_f + C_s)}.
+2\zeta\omega_n = \frac{1 + \omega_c R_f C_f}{R_f(C_i + C_f + C_s)} \tag{2.13}.
 ```
 
 The DC gain ($s = 0$) of (2.11):
@@ -216,7 +216,7 @@ The numerator constant can therefore be written as $R_f\,\omega_n^2$, giving the
 (restoring the sign for the inverting configuration):
 
 ```math
-Z_{TI}(s) = \frac{-R_f\,\omega_n^2}{s^2 + 2\zeta\omega_n\,s + \omega_n^2}.
+Z_{TI}(s) = \frac{-R_f\,\omega_n^2}{s^2 + 2\zeta\omega_n\,s + \omega_n^2} \tag{2.14}.
 ```
 
 ---
@@ -238,7 +238,7 @@ Q = \frac{1}{\sqrt{2}}
 The relationship between $Q$ and the damping ratio $\zeta$ is $Q = 1/(2\zeta)$, so:
 
 ```math
-\zeta = \frac{1}{\sqrt{2}}.
+\zeta = \frac{1}{\sqrt{2}} \tag{3.1}.
 ```
 
 This is the unique damping ratio that produces zero gain peaking in the magnitude response
@@ -261,7 +261,7 @@ Substituting (2.12) and (2.13):
 Multiply both sides by $[R_f(C_i + C_f + C_s)]^2$:
 
 ```math
-(1 + \omega_c R_f C_f)^2 = 2\,\omega_c R_f(C_i + C_f + C_s).
+(1 + \omega_c R_f C_f)^2 = 2\,\omega_c R_f(C_i + C_f + C_s) \tag{3.2}.
 ```
 
 ### Step 3: Solve for $C_f$ (with $C_s = 0$ for clarity)
@@ -270,13 +270,13 @@ Setting $C_s = 0$ (the typical case; if $C_s \neq 0$, it can be absorbed into $C
 by defining $C_i' = C_i + C_s$):
 
 ```math
-(1 + \omega_c R_f C_f)^2 = 2\,\omega_c R_f(C_i + C_f).
+(1 + \omega_c R_f C_f)^2 = 2\,\omega_c R_f(C_i + C_f) \tag{3.3}.
 ```
 
 Define a characteristic capacitance:
 
 ```math
-C_c \equiv \frac{1}{\omega_c R_f} = \frac{1}{2\pi f_c R_f}.
+C_c \equiv \frac{1}{\omega_c R_f} = \frac{1}{2\pi f_c R_f} \tag{3.4}.
 ```
 
 This has a physical interpretation: $C_c$ is the capacitance whose impedance at $f_c$
@@ -307,13 +307,13 @@ C_c^2 + C_f^2 = 2C_i C_c
 ```
 
 ```math
-C_f^2 = 2C_i C_c - C_c^2 = C_c(2C_i - C_c).
+C_f^2 = 2C_i C_c - C_c^2 = C_c(2C_i - C_c) \tag{3.5}.
 ```
 
 Taking the positive root:
 
 ```math
-C_f = \sqrt{C_c(2C_i - C_c)}, \qquad C_c = \frac{1}{2\pi f_c R_f}.
+C_f = \sqrt{C_c(2C_i - C_c)}, \qquad C_c = \frac{1}{2\pi f_c R_f} \tag{3.6}.
 ```
 
 ### Validity condition
@@ -350,7 +350,7 @@ For a general second-order transfer function with damping ratio $\zeta$,
 the squared magnitude response is:
 
 ```math
-|H(j\omega)|^2 = \frac{\omega_n^4}{(\omega_n^2 - \omega^2)^2 + (2\zeta\omega_n\omega)^2}
+|H(j\omega)|^2 = \frac{\omega_n^4}{(\omega_n^2 - \omega^2)^2 + (2\zeta\omega_n\omega)^2} \tag{4.1}
 ```
 
 For the Butterworth case $\zeta = 1/\sqrt{2}$, substituting and simplifying:
@@ -388,7 +388,7 @@ Therefore the $-3\,\text{dB}$ bandwidth is exactly the natural frequency:
 In terms of ordinary frequency:
 
 ```math
-f_{-3\text{dB}} = \frac{\omega_n}{2\pi}.
+f_{-3\text{dB}} = \frac{\omega_n}{2\pi} \tag{4.2}.
 ```
 
 ### Express in terms of circuit parameters
@@ -402,7 +402,7 @@ From (2.12):
 Therefore:
 
 ```math
-f_{-3\text{dB}} = \frac{\omega_n}{2\pi} = \frac{1}{2\pi}\sqrt{\frac{2\pi f_c}{R_f(C_i + C_f + C_s)}} = \sqrt{\frac{f_c}{2\pi R_f(C_i + C_f + C_s)}}.
+f_{-3\text{dB}} = \frac{\omega_n}{2\pi} = \frac{1}{2\pi}\sqrt{\frac{2\pi f_c}{R_f(C_i + C_f + C_s)}} = \sqrt{\frac{f_c}{2\pi R_f(C_i + C_f + C_s)}} \tag{4.3}.
 ```
 
 ---
@@ -422,7 +422,7 @@ total noise power:
 For a Butterworth filter, $|H_{\max}| = |H(0)| = 1$, so:
 
 ```math
-\text{NEB} = \int_0^{\infty} |H(f)|^2 \, df.
+\text{NEB} = \int_0^{\infty} |H(f)|^2 \, df \tag{5.1}.
 ```
 
 ### General $n$-th order Butterworth NEB
@@ -436,7 +436,7 @@ For an $n$-th order Butterworth filter, the squared magnitude response is:
 Substituting into (5.1) with $u = f/f_{-3\text{dB}}$:
 
 ```math
-\text{NEB} = f_{-3\text{dB}} \int_0^{\infty} \frac{du}{1 + u^{2n}}.
+\text{NEB} = f_{-3\text{dB}} \int_0^{\infty} \frac{du}{1 + u^{2n}} \tag{5.2}.
 ```
 
 The integral $\displaystyle I_n = \int_0^{\infty} \frac{du}{1 + u^{2n}}$ is a standard result
@@ -453,13 +453,13 @@ where $B(a, b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$ is the beta function.
 Using the reflection formula $\Gamma(z)\,\Gamma(1-z) = \pi/\sin(\pi z)$ with $z = 1/(2n)$:
 
 ```math
-I_n = \frac{1}{2n} \cdot \frac{\pi}{\sin\!\left(\frac{\pi}{2n}\right)}.
+I_n = \frac{1}{2n} \cdot \frac{\pi}{\sin\!\left(\frac{\pi}{2n}\right)} \tag{5.3}.
 ```
 
 Therefore:
 
 ```math
-\text{NEB} = f_{-3\text{dB}} \cdot \frac{\pi}{2n\,\sin\!\left(\frac{\pi}{2n}\right)}.
+\text{NEB} = f_{-3\text{dB}} \cdot \frac{\pi}{2n\,\sin\!\left(\frac{\pi}{2n}\right)} \tag{5.4}.
 ```
 
 ### Specialization to $n = 2$
@@ -467,7 +467,7 @@ Therefore:
 For the second-order Butterworth ($n = 2$):
 
 ```math
-\text{NEB} = f_{-3\text{dB}} \cdot \frac{\pi}{2 \cdot 2 \cdot \sin\!\left(\frac{\pi}{4}\right)} = f_{-3\text{dB}} \cdot \frac{\pi}{4 \cdot \frac{\sqrt{2}}{2}} = f_{-3\text{dB}} \cdot \frac{\pi}{2\sqrt{2}}
+\text{NEB} = f_{-3\text{dB}} \cdot \frac{\pi}{2 \cdot 2 \cdot \sin\!\left(\frac{\pi}{4}\right)} = f_{-3\text{dB}} \cdot \frac{\pi}{4 \cdot \frac{\sqrt{2}}{2}} = f_{-3\text{dB}} \cdot \frac{\pi}{2\sqrt{2}} \tag{5.5}
 ```
 
 Rationalizing:
