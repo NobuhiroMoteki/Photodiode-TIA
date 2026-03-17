@@ -29,7 +29,7 @@ Butterworth condition (Q = 1/sqrt(2), no gain-peaking):
     (1 + wc*R_f*C_f)^2 = 2 * wc * R_f * (C_i + C_f + C_s)
 
 Using C_c = 1/(wc*R_f), the optimal feedback capacitor is:
-    C_f = sqrt(C_c * (2*C_i - C_c))
+    C_f = sqrt(C_c * (2*(C_i + C_s) - C_c))
 
 The -3 dB bandwidth equals the natural frequency:
     f_n = sqrt(f_c / (2*pi*R_f*(C_i + C_f + C_s)))   [Hz]
@@ -201,7 +201,7 @@ def design_tia(
     # --- Butterworth design ---
     C_i = C_d + opamp.C_icm + opamp.C_id
     C_c = 1.0 / (2.0 * np.pi * R_f * opamp.f_c)
-    C_f = (C_c * (2.0 * C_i - C_c)) ** 0.5
+    C_f = (C_c * (2.0 * (C_i + C_s) - C_c)) ** 0.5
 
     # -3 dB bandwidth (= natural frequency for Butterworth)
     #   f_n = sqrt( f_c / (2*pi * R_f * (C_i + C_f + C_s)) )

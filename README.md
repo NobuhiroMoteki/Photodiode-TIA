@@ -157,7 +157,7 @@ Substituting into the damping equation and using $C_c = 1/(\omega_c R_f)$:
 ```
 
 ```math
-\Rightarrow \quad C_f = \sqrt{C_c (2C_i - C_c)}, \qquad C_c = \frac{1}{2\pi f_c R_f}.
+\Rightarrow \quad C_f = \sqrt{C_c \bigl(2(C_i + C_s) - C_c\bigr)}, \qquad C_c = \frac{1}{2\pi f_c R_f}.
 ```
 
 This is the exact solution without the common approximation $\omega_c R_f C_f \gg 1$.
