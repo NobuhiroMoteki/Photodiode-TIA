@@ -137,20 +137,28 @@ feedback impedance $Z_f = R_f \parallel C_f$ and
 input capacitance $C_i = C_d + C_{icm} + C_{id}$,
 the closed-loop transimpedance is:
 
-$$Z_{TI}(s) = \frac{-R_f \, \omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}$$
+```math
+Z_{TI}(s) = \frac{-R_f \, \omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}
+```
 
 where the natural frequency and damping ratio are:
 
-$$\omega_n^2 = \frac{\omega_c}{R_f (C_i + C_f + C_s)}, \qquad 2\zeta\omega_n = \frac{1 + \omega_c R_f C_f}{R_f (C_i + C_f + C_s)}.$$
+```math
+\omega_n^2 = \frac{\omega_c}{R_f (C_i + C_f + C_s)}, \qquad 2\zeta\omega_n = \frac{1 + \omega_c R_f C_f}{R_f (C_i + C_f + C_s)}.
+```
 
 ### Butterworth design
 
 The Butterworth (maximally-flat) condition $Q = 1/\sqrt{2}$ (i.e. $\zeta = 1/\sqrt{2}$) eliminates gain peaking.
 Substituting into the damping equation and using $C_c = 1/(\omega_c R_f)$:
 
-$$(1 + \omega_c R_f C_f)^2 = 2\,\omega_c R_f (C_i + C_f + C_s)$$
+```math
+(1 + \omega_c R_f C_f)^2 = 2\,\omega_c R_f (C_i + C_f + C_s)
+```
 
-$$\Rightarrow \quad C_f = \sqrt{C_c (2C_i - C_c)}, \qquad C_c = \frac{1}{2\pi f_c R_f}.$$
+```math
+\Rightarrow \quad C_f = \sqrt{C_c (2C_i - C_c)}, \qquad C_c = \frac{1}{2\pi f_c R_f}.
+```
 
 This is the exact solution without the common approximation $\omega_c R_f C_f \gg 1$.
 See Graeme 1996, ch. 5 (eq. 5.8–5.12).
@@ -159,13 +167,17 @@ See Graeme 1996, ch. 5 (eq. 5.8–5.12).
 
 For the Butterworth response, the $-3\,\text{dB}$ bandwidth equals the natural frequency:
 
-$$f_{-3\text{dB}} = \frac{\omega_n}{2\pi} = \sqrt{\frac{f_c}{2\pi R_f (C_i + C_f + C_s)}}.$$
+```math
+f_{-3\text{dB}} = \frac{\omega_n}{2\pi} = \sqrt{\frac{f_c}{2\pi R_f (C_i + C_f + C_s)}}.
+```
 
 The noise equivalent bandwidth for an $n$-th order Butterworth filter is
 $\text{NEB} = f_{-3\text{dB}} \cdot \frac{\pi}{2n} / \sin\!\left(\frac{\pi}{2n}\right)$.
 For $n = 2$:
 
-$$\text{NEB} = f_{-3\text{dB}} \cdot \frac{\pi\sqrt{2}}{4} \approx 1.11 \, f_{-3\text{dB}}.$$
+```math
+\text{NEB} = f_{-3\text{dB}} \cdot \frac{\pi\sqrt{2}}{4} \approx 1.11 \, f_{-3\text{dB}}.
+```
 
 This replaces the single-pole approximation $\text{NEB} = (\pi/2) f_{-3\text{dB}}$.
 
