@@ -1,0 +1,3 @@
+name,Cd_spec,Vb_spec,phi_b,Id_spec,r_phi,wl,notes
+PIN-6D,60e-12,10,0.6,0.5e-9,0.55,770e-9,OSI Optoelectronics PIN photodiode
+SPOT-9DMI,60e-12,10,0.6,0.5e-9,0.55,770e-9,OSI Optoelectronics Quadrant photodiode
