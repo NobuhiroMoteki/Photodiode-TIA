@@ -126,7 +126,7 @@ The `design_tia()` function takes the following operating condition parameters:
 
 ## Theory
 
-> Full step-by-step derivations are given in [technical_note_tia_theory.md](technical_note_tia_theory.md).
+> Full step-by-step derivations are given in [technical_note_tia_theory.pdf](technical_note_tia_theory.pdf).
 
 ### Closed-loop transfer function
 
