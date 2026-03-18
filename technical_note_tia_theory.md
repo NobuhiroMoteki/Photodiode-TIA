@@ -623,7 +623,7 @@ The ratio $E_{\mathrm{no,bg}} / E_{\mathrm{noi,sig}}$ indicates whether the syst
 
 ## 8. References
 
-1. J. Graeme, *Photodiode Amplifiers: Op Amp Solutions*. McGraw-Hill, 1996. Ch. 5 (Eqs. 5.8--5.12).
+1. J. Graeme, *Photodiode Amplifiers: Op Amp Solutions*. McGraw-Hill, 1996.
 2. P. C. D. Hobbs, *Building Electro-Optical Systems: Making It All Work*, 2nd ed. Wiley, 2009.
 
 ## Acknowledgment

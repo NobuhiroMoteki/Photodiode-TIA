@@ -161,7 +161,7 @@ Substituting into the damping equation and using $C_c = 1/(\omega_c R_f)$:
 ```
 
 This is the exact solution without the common approximation $\omega_c R_f C_f \gg 1$.
-See Graeme 1996, ch. 5 (eq. 5.8–5.12).
+See Graeme 1996.
 
 ### Bandwidth and noise equivalent bandwidth
 
