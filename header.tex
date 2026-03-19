@@ -1,9 +1,0 @@
-% Keep tables on a single page
-\usepackage{longtable}
-\let\oldlongtable\longtable
-\let\endoldlongtable\endlongtable
-\renewenvironment{longtable}{\begin{minipage}{\textwidth}\oldlongtable}{\endoldlongtable\end{minipage}}
-
-% Wider column separation and row spacing in tables
-\setlength{\tabcolsep}{8pt}
-\renewcommand{\arraystretch}{1.8}

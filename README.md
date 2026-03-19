@@ -25,7 +25,8 @@ Two identical photodiodes are connected to two identical TIA channels. The small
 OPAMP_circuit_design/
 ├── tia_design.py                  # Calculation engine (functions & dataclasses)
 ├── Photodiode_TIA_design.ipynb    # Interactive notebook
-├── technical_note_tia_theory.md   # Full derivations of TIA formulas
+├── docs/theory_note.tex           # Full derivations of TIA formulas (LaTeX source)
+├── docs/theory_note.pdf           # Compiled PDF
 ├── data/
 │   ├── opamps.csv                 # Opamp parameter database
 │   └── photodiodes.csv            # Photodiode parameter database
@@ -126,7 +127,7 @@ The `design_tia()` function takes the following operating condition parameters:
 
 ## Theory
 
-> Full step-by-step derivations are given in [technical_note_tia_theory.pdf](technical_note_tia_theory.pdf).
+> Full step-by-step derivations are given in [docs/theory_note.pdf](docs/theory_note.pdf).
 
 ### Closed-loop transfer function
 

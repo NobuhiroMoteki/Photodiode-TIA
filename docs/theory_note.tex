@@ -1,0 +1,939 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{physics}
+\usepackage{bm}
+\usepackage{siunitx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+
+\setlength{\tabcolsep}{10pt}
+\renewcommand{\arraystretch}{1.6}
+
+\title{Technical Note: Design Theory for the Butterworth-Optimized\\
+Photodiode Transimpedance Amplifier}
+\author{N.~Moteki}
+\date{Last updated: 2026-03-19 (corresponds to Photodiode-TIA v0.1.0)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document provides a self-contained description of the mathematical
+theory implemented in the photodiode transimpedance amplifier (TIA)
+design tool.  It covers the single-pole opamp model, the derivation of
+the closed-loop second-order transfer function, the exact
+Butterworth-optimum feedback capacitance without the common
+$\omega_{\mathrm{c}} R_{\mathrm{f}} C_{\mathrm{f}} \gg 1$
+approximation, the $-3\,\mathrm{dB}$ bandwidth, the noise equivalent
+bandwidth for a second-order Butterworth response, the piecewise
+noise-gain integration for opamp voltage noise, and the shot/thermal
+noise analysis.  All algebraic steps are shown explicitly.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%======================================================================
+\section{Circuit model and assumptions}
+\label{sec:circuit-model}
+%======================================================================
+
+\subsection{Circuit topology}
+
+The TIA is an inverting opamp configuration with a photodiode at the
+input.  The non-inverting input is connected to ground.
+
+\begin{itemize}
+  \item $I_{\mathrm{pd}}$: photocurrent from the photodiode (signal
+    source, modelled as ideal current source)
+  \item $R_{\mathrm{f}}$, $C_{\mathrm{f}}$: feedback resistance and
+    capacitance (in parallel), connected from the output to the
+    inverting input
+  \item $C_{\mathrm{i}}$: total input capacitance at the inverting
+    node,
+    $C_{\mathrm{i}} = C_{\mathrm{d}} + C_{\mathrm{icm}} + C_{\mathrm{id}}$
+    \begin{itemize}
+      \item $C_{\mathrm{d}}$: photodiode junction capacitance
+      \item $C_{\mathrm{icm}}$: opamp common-mode input capacitance
+      \item $C_{\mathrm{id}}$: opamp differential input capacitance
+    \end{itemize}
+  \item $C_{\mathrm{s}}$: stray (parasitic) capacitance at the
+    inverting node to ground
+\end{itemize}
+
+\subsection{Opamp model}
+
+The opamp is modelled with a single-pole open-loop gain:
+\begin{equation}
+  A(s) = \frac{A_0 \,\omega_{\mathrm{p}}}{s + \omega_{\mathrm{p}}}
+  \label{eq:opamp-full}
+\end{equation}
+where $A_0$ is the DC open-loop gain and $\omega_{\mathrm{p}}$ is the
+dominant pole frequency.  For frequencies well above the dominant pole
+($s \gg \omega_{\mathrm{p}}$, i.e.\ $f \gg f_{\mathrm{p}}$, typically
+satisfied for $f > \SI{10}{\hertz}$), this simplifies to:
+\begin{equation}
+  A(s) \approx \frac{A_0 \,\omega_{\mathrm{p}}}{s}
+  = \frac{\omega_{\mathrm{c}}}{s}
+  \label{eq:opamp-integrator}
+\end{equation}
+where $\omega_{\mathrm{c}} = A_0\,\omega_{\mathrm{p}} = 2\pi
+f_{\mathrm{c}}$ is the gain-bandwidth product (GBW) in
+$\si{\radian\per\second}$.  This ``integrator model'' is the standard
+approximation used throughout TIA design literature and is accurate
+across the entire frequency range of interest
+($\si{\kilo\hertz}$--$\si{\mega\hertz}$).
+
+%======================================================================
+\section{Closed-loop transimpedance transfer function}
+\label{sec:transfer-function}
+%======================================================================
+
+\subsection{Goal}
+
+Derive the closed-loop transimpedance:
+\begin{equation*}
+  Z_{\mathrm{TI}}(s)
+  \equiv \frac{V_{\mathrm{out}}(s)}{I_{\mathrm{pd}}(s)}.
+\end{equation*}
+
+\subsection{Step 1: Define the feedback impedance}
+
+$R_{\mathrm{f}}$ and $C_{\mathrm{f}}$ are in parallel:
+\begin{equation}
+  Z_{\mathrm{f}}
+  = R_{\mathrm{f}} \;\|\; \frac{1}{sC_{\mathrm{f}}}
+  = \frac{R_{\mathrm{f}}}{1 + sR_{\mathrm{f}}C_{\mathrm{f}}}
+  \label{eq:Zf}
+\end{equation}
+
+\subsection{Step 2: Opamp constraint}
+
+With the non-inverting input grounded:
+\begin{equation*}
+  V_{\mathrm{out}} = -A(s) \cdot V^{-}
+  = -\frac{\omega_{\mathrm{c}}}{s}\,V^{-}
+\end{equation*}
+Solving for $V^-$:
+\begin{equation}
+  V^{-} = -\frac{s}{\omega_{\mathrm{c}}}\,V_{\mathrm{out}}
+  \label{eq:Vminus}
+\end{equation}
+
+\subsection{Step 3: Kirchhoff's current law at the inverting node}
+
+All currents leaving the inverting node must sum to zero.  The current
+into the node from the photodiode is $I_{\mathrm{pd}}$.  The currents
+leaving the node are:
+\begin{itemize}
+  \item Through the feedback network to the output:
+    $(V^{-} - V_{\mathrm{out}}) / Z_{\mathrm{f}}$
+  \item Through the total shunt capacitance
+    $(C_{\mathrm{i}} + C_{\mathrm{s}})$ to ground:
+    $V^{-} \cdot s(C_{\mathrm{i}} + C_{\mathrm{s}})$
+\end{itemize}
+KCL:
+\begin{equation*}
+  I_{\mathrm{pd}}
+  + \frac{V^{-} - V_{\mathrm{out}}}{Z_{\mathrm{f}}}
+  + V^{-} \cdot s(C_{\mathrm{i}} + C_{\mathrm{s}}) = 0
+\end{equation*}
+Note the sign convention: current flowing from the node through
+$Z_{\mathrm{f}}$ toward $V_{\mathrm{out}}$ is
+$(V^{-} - V_{\mathrm{out}})/Z_{\mathrm{f}}$.  Rearranging with
+current into the node on the left:
+\begin{equation}
+  I_{\mathrm{pd}}
+  = \frac{V_{\mathrm{out}} - V^{-}}{Z_{\mathrm{f}}}
+  - V^{-} \cdot s(C_{\mathrm{i}} + C_{\mathrm{s}})
+  \label{eq:kcl}
+\end{equation}
+
+\subsection{Step 4: Substitute the opamp constraint}
+
+Substitute \eqref{eq:Zf} and \eqref{eq:Vminus} into \eqref{eq:kcl}.
+
+First, compute $V_{\mathrm{out}} - V^-$:
+\begin{equation}
+  V_{\mathrm{out}} - V^{-}
+  = V_{\mathrm{out}}\!\left(1 + \frac{s}{\omega_{\mathrm{c}}}\right)
+  = V_{\mathrm{out}} \cdot
+    \frac{\omega_{\mathrm{c}} + s}{\omega_{\mathrm{c}}}
+  \label{eq:Vdiff}
+\end{equation}
+
+Substitute into the feedback current term:
+\begin{equation}
+  \frac{V_{\mathrm{out}} - V^{-}}{Z_{\mathrm{f}}}
+  = V_{\mathrm{out}} \cdot
+    \frac{\omega_{\mathrm{c}} + s}{\omega_{\mathrm{c}}} \cdot
+    \frac{1 + sR_{\mathrm{f}}C_{\mathrm{f}}}{R_{\mathrm{f}}}
+  \label{eq:Ifb}
+\end{equation}
+
+The shunt capacitance current term:
+\begin{equation}
+  -V^{-} \cdot s(C_{\mathrm{i}} + C_{\mathrm{s}})
+  = \frac{s^2(C_{\mathrm{i}} + C_{\mathrm{s}})}{\omega_{\mathrm{c}}}
+    \,V_{\mathrm{out}}
+  \label{eq:Ishunt}
+\end{equation}
+
+\subsection{Step 5: Combine}
+
+Substituting \eqref{eq:Ifb} and \eqref{eq:Ishunt} into
+\eqref{eq:kcl}:
+\begin{equation*}
+  I_{\mathrm{pd}}
+  = V_{\mathrm{out}} \left[
+    \frac{(\omega_{\mathrm{c}} + s)
+          (1 + sR_{\mathrm{f}}C_{\mathrm{f}})}
+         {\omega_{\mathrm{c}} R_{\mathrm{f}}}
+    + \frac{s^2(C_{\mathrm{i}} + C_{\mathrm{s}})}{\omega_{\mathrm{c}}}
+  \right]
+\end{equation*}
+Factor out $1/\omega_{\mathrm{c}}$:
+\begin{equation}
+  I_{\mathrm{pd}}
+  = \frac{V_{\mathrm{out}}}{\omega_{\mathrm{c}}} \left[
+    \frac{(\omega_{\mathrm{c}} + s)
+          (1 + sR_{\mathrm{f}}C_{\mathrm{f}})}
+         {R_{\mathrm{f}}}
+    + s^2(C_{\mathrm{i}} + C_{\mathrm{s}})
+  \right]
+  \label{eq:Ipd-combined}
+\end{equation}
+
+\subsection{Step 6: Expand the product}
+
+\begin{align*}
+  (\omega_{\mathrm{c}} + s)(1 + sR_{\mathrm{f}}C_{\mathrm{f}})
+  &= \omega_{\mathrm{c}}
+   + \omega_{\mathrm{c}} s R_{\mathrm{f}} C_{\mathrm{f}}
+   + s + s^2 R_{\mathrm{f}} C_{\mathrm{f}} \\
+  &= s^2 R_{\mathrm{f}} C_{\mathrm{f}}
+   + s(1 + \omega_{\mathrm{c}} R_{\mathrm{f}} C_{\mathrm{f}})
+   + \omega_{\mathrm{c}}
+\end{align*}
+
+\subsection{Step 7: Divide by $R_{\mathrm{f}}$ and add the shunt term}
+
+\begin{align*}
+  &\frac{(\omega_{\mathrm{c}} + s)
+        (1 + sR_{\mathrm{f}}C_{\mathrm{f}})}
+       {R_{\mathrm{f}}}
+  + s^2(C_{\mathrm{i}} + C_{\mathrm{s}}) \\
+  &= s^2 C_{\mathrm{f}}
+   + \frac{s(1 + \omega_{\mathrm{c}} R_{\mathrm{f}} C_{\mathrm{f}})}
+          {R_{\mathrm{f}}}
+   + \frac{\omega_{\mathrm{c}}}{R_{\mathrm{f}}}
+   + s^2(C_{\mathrm{i}} + C_{\mathrm{s}}) \\
+  &= s^2(C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})
+   + s\,\frac{1 + \omega_{\mathrm{c}} R_{\mathrm{f}} C_{\mathrm{f}}}
+             {R_{\mathrm{f}}}
+   + \frac{\omega_{\mathrm{c}}}{R_{\mathrm{f}}}
+\end{align*}
+
+\subsection{Step 8: Form the transfer function}
+
+From \eqref{eq:Ipd-combined} and the result of Step~7:
+\begin{equation}
+  Z_{\mathrm{TI}}(s)
+  = \frac{V_{\mathrm{out}}}{I_{\mathrm{pd}}}
+  = \frac{\omega_{\mathrm{c}}}
+         {s^2(C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})
+          + s\,\dfrac{1 + \omega_{\mathrm{c}}
+          R_{\mathrm{f}} C_{\mathrm{f}}}{R_{\mathrm{f}}}
+          + \dfrac{\omega_{\mathrm{c}}}{R_{\mathrm{f}}}}
+  \label{eq:Zti-raw}
+\end{equation}
+(The overall sign is negative for the inverting configuration; we write
+the magnitude here and note the $\SI{180}{\degree}$ phase inversion
+separately.)
+
+\subsection{Step 9: Identify the standard second-order form}
+
+A standard second-order low-pass transfer function has the form:
+\begin{equation*}
+  H(s) = \frac{K\,\omega_{\mathrm{n}}^2}
+              {s^2 + 2\zeta\omega_{\mathrm{n}}\,s
+               + \omega_{\mathrm{n}}^2}
+\end{equation*}
+
+Dividing numerator and denominator of \eqref{eq:Zti-raw} by
+$(C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})$:
+\begin{equation}
+  Z_{\mathrm{TI}}(s)
+  = \frac{\dfrac{\omega_{\mathrm{c}}}
+              {C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}}}}
+         {s^2
+          + \dfrac{1 + \omega_{\mathrm{c}}R_{\mathrm{f}}C_{\mathrm{f}}}
+                  {R_{\mathrm{f}}
+                   (C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})}\,s
+          + \dfrac{\omega_{\mathrm{c}}}
+                  {R_{\mathrm{f}}
+                   (C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})}}
+  \label{eq:Zti-standard}
+\end{equation}
+
+By comparison with the standard form, we identify:
+\begin{equation}
+  \omega_{\mathrm{n}}^2
+  = \frac{\omega_{\mathrm{c}}}
+         {R_{\mathrm{f}}(C_{\mathrm{i}} + C_{\mathrm{f}}
+          + C_{\mathrm{s}})}
+  \label{eq:omega-n}
+\end{equation}
+\begin{equation}
+  2\zeta\omega_{\mathrm{n}}
+  = \frac{1 + \omega_{\mathrm{c}} R_{\mathrm{f}} C_{\mathrm{f}}}
+         {R_{\mathrm{f}}(C_{\mathrm{i}} + C_{\mathrm{f}}
+          + C_{\mathrm{s}})}
+  \label{eq:damping}
+\end{equation}
+
+The DC gain ($s = 0$) of \eqref{eq:Zti-standard}:
+\begin{equation*}
+  Z_{\mathrm{TI}}(0)
+  = \frac{\omega_{\mathrm{c}}
+          / (C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})}
+         {\omega_{\mathrm{c}}
+          / [R_{\mathrm{f}}(C_{\mathrm{i}} + C_{\mathrm{f}}
+          + C_{\mathrm{s}})]}
+  = R_{\mathrm{f}}.
+\end{equation*}
+
+The numerator constant can therefore be written as
+$R_{\mathrm{f}}\,\omega_{\mathrm{n}}^2$, giving the final form
+(restoring the sign for the inverting configuration):
+\begin{equation}
+  Z_{\mathrm{TI}}(s)
+  = \frac{-R_{\mathrm{f}}\,\omega_{\mathrm{n}}^2}
+         {s^2 + 2\zeta\omega_{\mathrm{n}}\,s
+          + \omega_{\mathrm{n}}^2}
+  \label{eq:Zti-final}
+\end{equation}
+
+%======================================================================
+\section{Butterworth-optimum feedback capacitance}
+\label{sec:butterworth}
+%======================================================================
+
+\subsection{Objective}
+
+Find the value of $C_{\mathrm{f}}$ that makes the closed-loop response
+maximally flat (Butterworth).
+
+\subsection{Step 1: Butterworth condition}
+
+A second-order Butterworth (maximally flat magnitude) filter has
+quality factor:
+\begin{equation*}
+  Q = \frac{1}{\sqrt{2}}
+\end{equation*}
+The relationship between $Q$ and the damping ratio $\zeta$ is
+$Q = 1/(2\zeta)$, so:
+\begin{equation}
+  \zeta = \frac{1}{\sqrt{2}}
+  \label{eq:zeta-bw}
+\end{equation}
+This is the unique damping ratio that produces zero gain peaking in the
+magnitude response (i.e.\ $|Z_{\mathrm{TI}}(j\omega)|$ is
+monotonically decreasing).
+
+\subsection{Step 2: Translate the condition to circuit parameters}
+
+The Butterworth condition \eqref{eq:zeta-bw} implies:
+\begin{equation*}
+  (2\zeta\omega_{\mathrm{n}})^2
+  = 4\zeta^2\omega_{\mathrm{n}}^2
+  = 4 \cdot \frac{1}{2} \cdot \omega_{\mathrm{n}}^2
+  = 2\,\omega_{\mathrm{n}}^2.
+\end{equation*}
+
+Substituting \eqref{eq:omega-n} and \eqref{eq:damping}:
+\begin{equation*}
+  \left(
+    \frac{1 + \omega_{\mathrm{c}} R_{\mathrm{f}} C_{\mathrm{f}}}
+         {R_{\mathrm{f}}(C_{\mathrm{i}} + C_{\mathrm{f}}
+          + C_{\mathrm{s}})}
+  \right)^{\!2}
+  = 2 \cdot \frac{\omega_{\mathrm{c}}}
+                  {R_{\mathrm{f}}(C_{\mathrm{i}} + C_{\mathrm{f}}
+                   + C_{\mathrm{s}})}
+\end{equation*}
+Multiply both sides by
+$[R_{\mathrm{f}}(C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})]^2$:
+\begin{equation}
+  (1 + \omega_{\mathrm{c}} R_{\mathrm{f}} C_{\mathrm{f}})^2
+  = 2\,\omega_{\mathrm{c}} R_{\mathrm{f}}
+    (C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})
+  \label{eq:bw-condition}
+\end{equation}
+
+\subsection{Step 3: Solve for $C_{\mathrm{f}}$}
+
+Define a characteristic capacitance:
+\begin{equation}
+  C_{\mathrm{c}}
+  \equiv \frac{1}{\omega_{\mathrm{c}} R_{\mathrm{f}}}
+  = \frac{1}{2\pi f_{\mathrm{c}} R_{\mathrm{f}}}
+  \label{eq:Cc}
+\end{equation}
+This has a physical interpretation: $C_{\mathrm{c}}$ is the capacitance
+whose impedance at $f_{\mathrm{c}}$ equals $R_{\mathrm{f}}$.
+
+Rewrite \eqref{eq:bw-condition} using
+$\omega_{\mathrm{c}} R_{\mathrm{f}} = 1/C_{\mathrm{c}}$:
+\begin{equation*}
+  \left(1 + \frac{C_{\mathrm{f}}}{C_{\mathrm{c}}}\right)^{\!2}
+  = \frac{2(C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})}
+         {C_{\mathrm{c}}}
+\end{equation*}
+Expand the left side:
+\begin{equation*}
+  1 + \frac{2C_{\mathrm{f}}}{C_{\mathrm{c}}}
+    + \frac{C_{\mathrm{f}}^2}{C_{\mathrm{c}}^2}
+  = \frac{2(C_{\mathrm{i}} + C_{\mathrm{s}})}{C_{\mathrm{c}}}
+    + \frac{2C_{\mathrm{f}}}{C_{\mathrm{c}}}
+\end{equation*}
+The $2C_{\mathrm{f}}/C_{\mathrm{c}}$ terms cancel:
+\begin{equation*}
+  1 + \frac{C_{\mathrm{f}}^2}{C_{\mathrm{c}}^2}
+  = \frac{2(C_{\mathrm{i}} + C_{\mathrm{s}})}{C_{\mathrm{c}}}
+\end{equation*}
+Multiply through by $C_{\mathrm{c}}^2$:
+\begin{equation*}
+  C_{\mathrm{f}}^2
+  = 2(C_{\mathrm{i}} + C_{\mathrm{s}})\,C_{\mathrm{c}}
+    - C_{\mathrm{c}}^2
+  = C_{\mathrm{c}}\bigl(2(C_{\mathrm{i}} + C_{\mathrm{s}})
+    - C_{\mathrm{c}}\bigr)
+\end{equation*}
+Taking the positive root:
+\begin{equation}
+  C_{\mathrm{f}}
+  = \sqrt{C_{\mathrm{c}}\bigl(2(C_{\mathrm{i}} + C_{\mathrm{s}})
+    - C_{\mathrm{c}}\bigr)},
+  \qquad
+  C_{\mathrm{c}} = \frac{1}{2\pi f_{\mathrm{c}} R_{\mathrm{f}}}
+  \label{eq:Cf-exact}
+\end{equation}
+
+\subsection{Validity condition}
+
+\eqref{eq:Cf-exact} requires the argument of the square root to be
+non-negative:
+\begin{equation*}
+  2(C_{\mathrm{i}} + C_{\mathrm{s}}) - C_{\mathrm{c}} > 0
+  \quad\Longleftrightarrow\quad
+  C_{\mathrm{i}} + C_{\mathrm{s}}
+  > \frac{C_{\mathrm{c}}}{2}
+  = \frac{1}{2\omega_{\mathrm{c}} R_{\mathrm{f}}}.
+\end{equation*}
+When this condition is violated, the opamp GBW is too low (or
+$R_{\mathrm{f}}$ too small) to achieve a Butterworth response---the
+circuit is fundamentally underdamped regardless of $C_{\mathrm{f}}$.
+
+\subsection{Relation to the common approximation}
+
+Many references simplify by assuming
+$\omega_{\mathrm{c}} R_{\mathrm{f}} C_{\mathrm{f}} \gg 1$
+(equivalently $C_{\mathrm{f}} \gg C_{\mathrm{c}}$).  Under this
+approximation, \eqref{eq:bw-condition} becomes:
+\begin{equation*}
+  (\omega_{\mathrm{c}} R_{\mathrm{f}} C_{\mathrm{f}})^2
+  \approx 2\,\omega_{\mathrm{c}} R_{\mathrm{f}}
+    (C_{\mathrm{i}} + C_{\mathrm{s}})
+  \quad\Longrightarrow\quad
+  C_{\mathrm{f}}
+  \approx \sqrt{\frac{2(C_{\mathrm{i}} + C_{\mathrm{s}})}
+                     {\omega_{\mathrm{c}} R_{\mathrm{f}}}}
+  = \sqrt{2(C_{\mathrm{i}} + C_{\mathrm{s}})\,C_{\mathrm{c}}}.
+\end{equation*}
+\eqref{eq:Cf-exact} is the \textbf{exact} solution that does not rely
+on this approximation.  The difference is significant when
+$C_{\mathrm{c}}$ is not negligible compared to
+$C_{\mathrm{i}} + C_{\mathrm{s}}$ (i.e.\ when $R_{\mathrm{f}}$ is
+small or $f_{\mathrm{c}}$ is low).
+
+%======================================================================
+\section{Bandwidth}
+\label{sec:bandwidth}
+%======================================================================
+
+\subsection{The $-3\,\mathrm{dB}$ bandwidth of a second-order
+  Butterworth}
+
+For a general second-order transfer function with damping ratio
+$\zeta$, the squared magnitude response is:
+\begin{equation*}
+  |H(j\omega)|^2
+  = \frac{\omega_{\mathrm{n}}^4}
+         {(\omega_{\mathrm{n}}^2 - \omega^2)^2
+          + (2\zeta\omega_{\mathrm{n}}\omega)^2}
+\end{equation*}
+For the Butterworth case $\zeta = 1/\sqrt{2}$, substituting and
+simplifying:
+\begin{equation*}
+  |H(j\omega)|^2
+  = \frac{\omega_{\mathrm{n}}^4}
+         {(\omega_{\mathrm{n}}^2 - \omega^2)^2
+          + 2\omega_{\mathrm{n}}^2\omega^2}
+\end{equation*}
+Expand the denominator:
+\begin{equation*}
+  = \omega_{\mathrm{n}}^4
+    - 2\omega_{\mathrm{n}}^2\omega^2 + \omega^4
+    + 2\omega_{\mathrm{n}}^2\omega^2
+  = \omega_{\mathrm{n}}^4 + \omega^4
+\end{equation*}
+Therefore:
+\begin{equation}
+  |H(j\omega)|^2
+  = \frac{\omega_{\mathrm{n}}^4}
+         {\omega_{\mathrm{n}}^4 + \omega^4}
+  = \frac{1}{1 + (\omega/\omega_{\mathrm{n}})^4}
+  \label{eq:bw-mag}
+\end{equation}
+This is the defining form of a second-order Butterworth response.
+
+At $\omega = \omega_{\mathrm{n}}$:
+\begin{equation*}
+  |H(j\omega_{\mathrm{n}})|^2 = \frac{1}{2}
+  \quad\Longrightarrow\quad
+  |H(j\omega_{\mathrm{n}})| = \frac{1}{\sqrt{2}}
+  \;(-3\,\mathrm{dB}).
+\end{equation*}
+Therefore the $-3\,\mathrm{dB}$ bandwidth is exactly the natural
+frequency:
+\begin{equation*}
+  \omega_{-3\,\mathrm{dB}} = \omega_{\mathrm{n}}.
+\end{equation*}
+In terms of ordinary frequency:
+\begin{equation}
+  f_{-3\,\mathrm{dB}} = \frac{\omega_{\mathrm{n}}}{2\pi}
+  \label{eq:f3dB}
+\end{equation}
+
+\subsection{Express in terms of circuit parameters}
+
+From \eqref{eq:omega-n}:
+\begin{equation*}
+  \omega_{\mathrm{n}}
+  = \sqrt{\frac{\omega_{\mathrm{c}}}
+               {R_{\mathrm{f}}(C_{\mathrm{i}} + C_{\mathrm{f}}
+                + C_{\mathrm{s}})}}
+  = \sqrt{\frac{2\pi f_{\mathrm{c}}}
+               {R_{\mathrm{f}}(C_{\mathrm{i}} + C_{\mathrm{f}}
+                + C_{\mathrm{s}})}}
+\end{equation*}
+Therefore:
+\begin{equation}
+  f_{-3\,\mathrm{dB}}
+  = \frac{\omega_{\mathrm{n}}}{2\pi}
+  = \sqrt{\frac{f_{\mathrm{c}}}
+               {2\pi R_{\mathrm{f}}(C_{\mathrm{i}} + C_{\mathrm{f}}
+                + C_{\mathrm{s}})}}
+  \label{eq:f3dB-circuit}
+\end{equation}
+
+%======================================================================
+\section{Noise equivalent bandwidth}
+\label{sec:neb}
+%======================================================================
+
+\subsection{Definition}
+
+The noise equivalent bandwidth (NEB) of a filter $H(f)$ is the
+bandwidth of an ideal rectangular (brick-wall) filter with the same
+peak gain that passes the same total noise power:
+\begin{equation*}
+  \mathrm{NEB}
+  = \frac{1}{|H_{\mathrm{max}}|^2}
+    \int_0^{\infty} |H(f)|^2 \dd{f}
+\end{equation*}
+For a Butterworth filter, $|H_{\mathrm{max}}| = |H(0)| = 1$, so:
+\begin{equation}
+  \mathrm{NEB} = \int_0^{\infty} |H(f)|^2 \dd{f}
+  \label{eq:neb-def}
+\end{equation}
+
+\subsection{General $n$-th order Butterworth NEB}
+
+For an $n$-th order Butterworth filter, the squared magnitude response
+is:
+\begin{equation*}
+  |H(f)|^2 = \frac{1}{1 + (f/f_{-3\,\mathrm{dB}})^{2n}}
+\end{equation*}
+Substituting into \eqref{eq:neb-def} with
+$u = f/f_{-3\,\mathrm{dB}}$:
+\begin{equation}
+  \mathrm{NEB}
+  = f_{-3\,\mathrm{dB}} \int_0^{\infty} \frac{\dd{u}}{1 + u^{2n}}
+  \label{eq:neb-integral}
+\end{equation}
+
+The integral
+$\displaystyle I_n = \int_0^{\infty} \frac{\dd{u}}{1 + u^{2n}}$ is a
+standard result that can be evaluated using the substitution
+$t = u^{2n}$ and recognizing the beta function.
+
+Setting $t = u^{2n}$, so $u = t^{1/(2n)}$,
+$\dd{u} = \frac{1}{2n}\,t^{1/(2n)-1}\dd{t}$:
+\begin{equation*}
+  I_n = \int_0^{\infty} \frac{1}{1+t} \cdot
+        \frac{1}{2n}\,t^{1/(2n)-1}\dd{t}
+      = \frac{1}{2n}\,
+        B\!\left(\frac{1}{2n},\;1 - \frac{1}{2n}\right)
+\end{equation*}
+where $B(a,b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$ is the beta function.
+
+Using the reflection formula
+$\Gamma(z)\,\Gamma(1-z) = \pi/\sin(\pi z)$ with $z = 1/(2n)$:
+\begin{equation}
+  I_n = \frac{1}{2n} \cdot
+        \frac{\pi}{\sin\!\left(\dfrac{\pi}{2n}\right)}
+  \label{eq:In}
+\end{equation}
+Therefore:
+\begin{equation}
+  \mathrm{NEB}
+  = f_{-3\,\mathrm{dB}} \cdot
+    \frac{\pi}{2n\,\sin\!\left(\dfrac{\pi}{2n}\right)}
+  \label{eq:neb-general}
+\end{equation}
+
+\subsection{Specialization to $n = 2$}
+
+For the second-order Butterworth ($n = 2$):
+\begin{equation*}
+  \mathrm{NEB}
+  = f_{-3\,\mathrm{dB}} \cdot
+    \frac{\pi}{4 \cdot \dfrac{\sqrt{2}}{2}}
+  = f_{-3\,\mathrm{dB}} \cdot \frac{\pi}{2\sqrt{2}}
+  = f_{-3\,\mathrm{dB}} \cdot \frac{\pi\sqrt{2}}{4}
+\end{equation*}
+\begin{equation}
+  \mathrm{NEB}
+  = f_{-3\,\mathrm{dB}} \cdot \frac{\pi\sqrt{2}}{4}
+  \approx 1.111\,f_{-3\,\mathrm{dB}}
+  \label{eq:neb-2nd}
+\end{equation}
+
+\subsection{Comparison with the single-pole approximation}
+
+For a single-pole (first-order) system ($n = 1$):
+\begin{equation*}
+  \mathrm{NEB}_{n=1}
+  = f_{-3\,\mathrm{dB}} \cdot \frac{\pi}{2\sin(\pi/2)}
+  = f_{-3\,\mathrm{dB}} \cdot \frac{\pi}{2}
+  \approx 1.571\,f_{-3\,\mathrm{dB}}.
+\end{equation*}
+Many TIA references use this single-pole approximation even when the
+circuit has a second-order response.  The second-order Butterworth NEB
+is $1.111/1.571 = 0.707$ times the single-pole value---a 29\%
+difference that directly affects computed noise levels.
+
+%======================================================================
+\section{Noise analysis}
+\label{sec:noise}
+%======================================================================
+
+The TIA output noise is the root-sum-square (RSS) of several
+independent noise sources.  Each source has a spectral density that is
+shaped by the closed-loop gain before appearing at the output.  The
+noise sources fall into two categories: (a)~voltage noise of the opamp,
+which is amplified by the frequency-dependent noise gain, and
+(b)~current/thermal noise sources whose spectra are flat and are shaped
+only by the closed-loop transimpedance $|Z_{\mathrm{TI}}(f)|^2$.
+
+\subsection{Noise gain}
+
+The noise gain $G_{\mathrm{n}}(f)$ is the closed-loop gain from the
+opamp's input voltage noise source $e_{\mathrm{ni}}$ to the output.
+For a TIA with feedback impedance
+$Z_{\mathrm{f}} = R_{\mathrm{f}} \| (1/sC_{\mathrm{f}})$ and total
+input-to-ground capacitance $(C_{\mathrm{i}} + C_{\mathrm{s}})$, the
+noise gain is:
+\begin{equation*}
+  G_{\mathrm{n}}(f)
+  = 1 + \frac{Z_{\mathrm{in}}}{Z_{\mathrm{f}}}
+  = 1 + \frac{C_{\mathrm{i}} + C_{\mathrm{s}}}
+             {C_{\mathrm{f}} + C_{\mathrm{s}}}
+    \cdot
+    \frac{1 + s R_{\mathrm{f}} (C_{\mathrm{f}} + C_{\mathrm{s}})}
+         {1 + s R_{\mathrm{f}} (C_{\mathrm{i}} + C_{\mathrm{f}}
+          + C_{\mathrm{s}})}
+\end{equation*}
+
+This gain exhibits four distinct frequency regions that are exploited
+for piecewise integration:
+
+\begin{enumerate}
+  \item \textbf{Low-frequency flat region}
+    ($f < f_{\mathrm{zf}}$):
+    $G_{\mathrm{n}} \approx 1$
+  \item \textbf{Rising region}
+    ($f_{\mathrm{zf}} < f < f_{\mathrm{pf}}$):
+    $G_{\mathrm{n}} \approx f / f_{\mathrm{zf}}$
+  \item \textbf{Plateau region}
+    ($f_{\mathrm{pf}} < f < f_{\mathrm{i}}$):
+    $G_{\mathrm{n}} \approx 1 + C_{\mathrm{i}} / (C_{\mathrm{f}}
+    + C_{\mathrm{s}})$
+  \item \textbf{Roll-off region}
+    ($f > f_{\mathrm{i}}$):
+    $G_{\mathrm{n}}$ decreases as the loop gain falls below unity
+\end{enumerate}
+
+where the characteristic frequencies are:
+\begin{equation}
+  f_{\mathrm{zf}}
+  = \frac{1}{2\pi R_{\mathrm{f}}
+    (C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})}
+  \label{eq:fzf}
+\end{equation}
+\begin{equation}
+  f_{\mathrm{pf}}
+  = \frac{1}{2\pi R_{\mathrm{f}}
+    (C_{\mathrm{f}} + C_{\mathrm{s}})}
+  \label{eq:fpf}
+\end{equation}
+\begin{equation}
+  f_{\mathrm{i}}
+  = f_{\mathrm{c}} \cdot
+    \frac{C_{\mathrm{f}} + C_{\mathrm{s}}}
+         {C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}}}
+  \label{eq:fi}
+\end{equation}
+Here $f_{\mathrm{zf}}$ is the noise-gain zero frequency,
+$f_{\mathrm{pf}}$ is the noise-gain pole frequency, and
+$f_{\mathrm{i}}$ is the unity loop-gain (intersection) frequency.
+
+\subsection{Opamp voltage noise (piecewise integration)}
+
+The opamp input voltage noise spectral density has a $1/f$ component
+below the corner frequency $f_{\mathrm{f}}$ and a white (flat) floor
+$e_{\mathrm{nif}}$ above it:
+\begin{equation}
+  e_{\mathrm{ni}}(f)
+  = e_{\mathrm{nif}} \sqrt{1 + f_{\mathrm{f}} / f}
+  \label{eq:eni}
+\end{equation}
+
+The output-referred voltage noise RMS is obtained by integrating the
+product of $e_{\mathrm{ni}}^2(f)$ and $G_{\mathrm{n}}^2(f)$ over
+frequency, divided into five segments.  Defining a low-frequency cutoff
+$f_1$ (set to $\SI{0.01}{\hertz}$ in the implementation):
+
+\textbf{Region 1}---$1/f$ noise ($f_1$ to $f_{\mathrm{f}}$), noise
+gain $\approx 1$:
+\begin{equation}
+  E_{\mathrm{noe},1}^2
+  = e_{\mathrm{nif}}^2 \cdot f_{\mathrm{f}}
+    \ln\!\left(\frac{f_{\mathrm{f}}}{f_1}\right)
+  \label{eq:Enoe1}
+\end{equation}
+
+\textbf{Region 2}---white noise, flat gain ($f_{\mathrm{f}}$ to
+$f_{\mathrm{zf}}$), noise gain $\approx 1$:
+\begin{equation}
+  E_{\mathrm{noe},2}^2
+  = e_{\mathrm{nif}}^2 (f_{\mathrm{zf}} - f_{\mathrm{f}})
+  \label{eq:Enoe2}
+\end{equation}
+
+\textbf{Region 3}---white noise, rising gain ($f_{\mathrm{zf}}$ to
+$f_{\mathrm{pf}}$), noise gain $\approx f/f_{\mathrm{zf}}$:
+\begin{equation}
+  E_{\mathrm{noe},3}^2
+  = \frac{e_{\mathrm{nif}}^2}{f_{\mathrm{zf}}^2} \cdot
+    \frac{f_{\mathrm{pf}}^3 - f_{\mathrm{zf}}^3}{3}
+  \label{eq:Enoe3}
+\end{equation}
+
+\textbf{Region 4}---white noise, plateau ($f_{\mathrm{pf}}$ to
+$f_{\mathrm{i}}$), noise gain
+$\approx 1 + C_{\mathrm{i}}/(C_{\mathrm{f}} + C_{\mathrm{s}})$:
+\begin{equation}
+  E_{\mathrm{noe},4}^2
+  = e_{\mathrm{nif}}^2
+    \left(1 + \frac{C_{\mathrm{i}}}
+                   {C_{\mathrm{f}} + C_{\mathrm{s}}}\right)^{\!2}
+    (f_{\mathrm{i}} - f_{\mathrm{pf}})
+  \label{eq:Enoe4}
+\end{equation}
+
+\textbf{Region 5}---above unity loop gain ($f > f_{\mathrm{i}}$), gain
+$\approx f_{\mathrm{c}} / f$:
+\begin{equation}
+  E_{\mathrm{noe},5}^2
+  = e_{\mathrm{nif}}^2 \cdot \frac{f_{\mathrm{c}}^2}{f_{\mathrm{i}}}
+  \label{eq:Enoe5}
+\end{equation}
+Note: \eqref{eq:Enoe5} arises from
+$\int_{f_{\mathrm{i}}}^{\infty} (f_{\mathrm{c}}/f)^2 \dd{f}
+= f_{\mathrm{c}}^2 / f_{\mathrm{i}}$.
+
+The total output-referred opamp voltage noise is:
+\begin{equation}
+  E_{\mathrm{noe}}
+  = \sqrt{E_{\mathrm{noe},1}^2 + E_{\mathrm{noe},2}^2
+          + E_{\mathrm{noe},3}^2 + E_{\mathrm{noe},4}^2
+          + E_{\mathrm{noe},5}^2}
+  \label{eq:Enoe-total}
+\end{equation}
+
+\subsection{Feedback resistor thermal noise}
+
+The Johnson noise of $R_{\mathrm{f}}$ produces a current noise density
+$\sqrt{4k_{\mathrm{B}}T/R_{\mathrm{f}}}$, which flows through
+$R_{\mathrm{f}}$ to produce output voltage noise.  Since this noise
+source sees the same transimpedance transfer function as the signal, the
+NEB (\eqref{eq:neb-2nd}) is the appropriate bandwidth:
+\begin{equation}
+  E_{\mathrm{noR}}
+  = \sqrt{4 k_{\mathrm{B}} T R_{\mathrm{f}} \cdot \mathrm{NEB}}
+  \label{eq:EnoR}
+\end{equation}
+
+\subsection{Shot noise}
+
+Shot noise from DC currents (bias current $I_{\mathrm{b}}$, dark
+current $I_{\mathrm{d}}$, and signal photocurrent $I_{\mathrm{p}}$)
+produces white current noise with spectral density $\sqrt{2qI}$.  Each
+is converted to output voltage noise by the transimpedance
+$R_{\mathrm{f}}$ over the NEB:
+\begin{equation}
+  E_{\mathrm{noi,bias}}
+  = R_{\mathrm{f}} \sqrt{2q\,I_{\mathrm{b}} \cdot \mathrm{NEB}}
+  \label{eq:Enoi-bias}
+\end{equation}
+\begin{equation}
+  E_{\mathrm{noi,dark}}
+  = R_{\mathrm{f}} \sqrt{2q\,I_{\mathrm{d}} \cdot \mathrm{NEB}}
+  \label{eq:Enoi-dark}
+\end{equation}
+\begin{equation}
+  E_{\mathrm{noi,sig}}
+  = R_{\mathrm{f}} \sqrt{2q\,I_{\mathrm{p}} \cdot \mathrm{NEB}}
+  \label{eq:Enoi-sig}
+\end{equation}
+
+\subsection{Opamp current noise}
+
+The opamp input current noise floor $i_{\mathrm{nif}}$ (white spectral
+density) also flows through $R_{\mathrm{f}}$:
+\begin{equation}
+  E_{\mathrm{noi,nif}}
+  = R_{\mathrm{f}} \, i_{\mathrm{nif}} \sqrt{\mathrm{NEB}}
+  \label{eq:Enoi-nif}
+\end{equation}
+
+\subsection{Total noise and signal-to-noise ratio}
+
+The total background noise (all sources except signal shot noise) is:
+\begin{equation}
+  E_{\mathrm{no,bg}}
+  = \sqrt{E_{\mathrm{noe}}^2 + E_{\mathrm{noR}}^2
+          + E_{\mathrm{noi,bias}}^2 + E_{\mathrm{noi,dark}}^2
+          + E_{\mathrm{noi,nif}}^2}
+  \label{eq:Eno-bg}
+\end{equation}
+
+The signal voltage is
+$V_{\mathrm{sig}} = R_{\mathrm{f}} \cdot I_{\mathrm{p}}
+= R_{\mathrm{f}} \cdot r_\phi \cdot P_{\mathrm{opt}}$, where
+$r_\phi$ is the photodiode responsivity and $P_{\mathrm{opt}}$ is the
+incident optical power.  The signal-to-noise ratio is:
+\begin{equation}
+  \mathrm{SNR}
+  = \frac{V_{\mathrm{sig}}}
+         {\sqrt{E_{\mathrm{no,bg}}^2 + E_{\mathrm{noi,sig}}^2}}
+  \label{eq:snr}
+\end{equation}
+
+The ratio $E_{\mathrm{no,bg}} / E_{\mathrm{noi,sig}}$ indicates
+whether the system is shot-noise limited (ratio $< 1$) or
+background-noise limited (ratio $> 1$).
+
+%======================================================================
+\section{Implementation mapping}
+\label{sec:implementation}
+%======================================================================
+
+\begin{longtable}{@{} p{0.35\textwidth} p{0.40\textwidth}
+                      p{0.17\textwidth} @{}}
+\toprule
+Theory & Implementation & File \\
+\midrule
+\endfirsthead
+\toprule
+Theory & Implementation & File \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+Opamp model, \eqref{eq:opamp-integrator}
+  & \texttt{Opamp} dataclass (\texttt{f\_c} field)
+  & \texttt{tia\_design.py} \\
+Input capacitance $C_{\mathrm{i}}$
+  & \texttt{C\_i = C\_d + opamp.C\_icm + opamp.C\_id}
+  & \texttt{tia\_design.py} \\
+Butterworth $C_{\mathrm{f}}$, \eqref{eq:Cf-exact}
+  & \texttt{C\_f = (C\_c * (2*(C\_i+C\_s) - C\_c))**0.5}
+  & \texttt{tia\_design.py} \\
+Bandwidth, \eqref{eq:f3dB-circuit}
+  & \texttt{BW\_t = (f\_c / (2*pi*R\_f*C\_tot))**0.5}
+  & \texttt{tia\_design.py} \\
+NEB, \eqref{eq:neb-2nd}
+  & \texttt{NEB = (pi*sqrt(2)/4) * BW\_t}
+  & \texttt{tia\_design.py} \\
+Noise gain frequencies, \eqref{eq:fzf}--\eqref{eq:fi}
+  & \texttt{f\_zf}, \texttt{f\_pf}, \texttt{f\_i}
+  & \texttt{tia\_design.py} \\
+Piecewise voltage noise, \eqref{eq:Enoe1}--\eqref{eq:Enoe-total}
+  & \texttt{E\_noe1} \ldots\ \texttt{E\_noe5}, \texttt{E\_noe}
+  & \texttt{tia\_design.py} \\
+Thermal noise, \eqref{eq:EnoR}
+  & \texttt{E\_noR}
+  & \texttt{tia\_design.py} \\
+Shot noise, \eqref{eq:Enoi-bias}--\eqref{eq:Enoi-sig}
+  & \texttt{E\_noi\_bias}, \texttt{E\_noi\_dark}, \texttt{E\_noi\_sig}
+  & \texttt{tia\_design.py} \\
+Current noise, \eqref{eq:Enoi-nif}
+  & \texttt{E\_noi\_nif}
+  & \texttt{tia\_design.py} \\
+SNR, \eqref{eq:snr}
+  & \texttt{snr}
+  & \texttt{tia\_design.py} \\
+Photodiode $C_{\mathrm{d}}(V_{\mathrm{b}})$ model
+  & \texttt{Photodiode.C\_d(Vb)}
+  & \texttt{tia\_design.py} \\
+Multi-opamp comparison
+  & \texttt{compare\_opamps(\ldots)}
+  & \texttt{tia\_design.py} \\
+\end{longtable}
+
+%======================================================================
+\section{References}
+\label{sec:references}
+%======================================================================
+
+\begin{enumerate}
+  \item J.~Graeme, \textit{Photodiode Amplifiers: Op Amp Solutions}.
+    McGraw-Hill, 1996.
+  \item P.~C.~D.~Hobbs,
+    \textit{Building Electro-Optical Systems: Making It All Work},
+    2nd~ed.\ Wiley, 2009.
+\end{enumerate}
+
+\subsection*{Acknowledgment}
+
+This document was prepared with the assistance of Claude (Anthropic).
+The author assumes full responsibility for the content.
+
+\end{document}
