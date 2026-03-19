@@ -92,15 +92,14 @@ across the entire frequency range of interest
 \label{sec:transfer-function}
 %======================================================================
 
-\subsection{Goal}
-
+\paragraph{Goal.}
 Derive the closed-loop transimpedance:
 \begin{equation*}
   Z_{\mathrm{TI}}(s)
   \equiv \frac{V_{\mathrm{out}}(s)}{I_{\mathrm{pd}}(s)}.
 \end{equation*}
 
-\subsection{Step 1: Define the feedback impedance}
+\paragraph{Step 1: Define the feedback impedance.}
 
 $R_{\mathrm{f}}$ and $C_{\mathrm{f}}$ are in parallel:
 \begin{equation}
@@ -110,7 +109,7 @@ $R_{\mathrm{f}}$ and $C_{\mathrm{f}}$ are in parallel:
   \label{eq:Zf}
 \end{equation}
 
-\subsection{Step 2: Opamp constraint}
+\paragraph{Step 2: Opamp constraint.}
 
 With the non-inverting input grounded:
 \begin{equation*}
@@ -123,7 +122,7 @@ Solving for $V^-$:
   \label{eq:Vminus}
 \end{equation}
 
-\subsection{Step 3: Kirchhoff's current law at the inverting node}
+\paragraph{Step 3: Kirchhoff's current law at the inverting node.}
 
 All currents leaving the inverting node must sum to zero.  The current
 into the node from the photodiode is $I_{\mathrm{pd}}$.  The currents
@@ -152,7 +151,7 @@ current into the node on the left:
   \label{eq:kcl}
 \end{equation}
 
-\subsection{Step 4: Substitute the opamp constraint}
+\paragraph{Step 4: Substitute the opamp constraint.}
 
 Substitute \eqref{eq:Zf} and \eqref{eq:Vminus} into \eqref{eq:kcl}.
 
@@ -182,7 +181,7 @@ The shunt capacitance current term:
   \label{eq:Ishunt}
 \end{equation}
 
-\subsection{Step 5: Combine}
+\paragraph{Step 5: Combine.}
 
 Substituting \eqref{eq:Ifb} and \eqref{eq:Ishunt} into
 \eqref{eq:kcl}:
@@ -207,7 +206,7 @@ Factor out $1/\omega_{\mathrm{c}}$:
   \label{eq:Ipd-combined}
 \end{equation}
 
-\subsection{Step 6: Expand the product}
+\paragraph{Step 6: Expand the product.}
 
 \begin{align*}
   (\omega_{\mathrm{c}} + s)(1 + sR_{\mathrm{f}}C_{\mathrm{f}})
@@ -219,7 +218,7 @@ Factor out $1/\omega_{\mathrm{c}}$:
    + \omega_{\mathrm{c}}
 \end{align*}
 
-\subsection{Step 7: Divide by $R_{\mathrm{f}}$ and add the shunt term}
+\paragraph{Step 7: Divide by $R_{\mathrm{f}}$ and add the shunt term.}
 
 \begin{align*}
   &\frac{(\omega_{\mathrm{c}} + s)
@@ -237,7 +236,7 @@ Factor out $1/\omega_{\mathrm{c}}$:
    + \frac{\omega_{\mathrm{c}}}{R_{\mathrm{f}}}
 \end{align*}
 
-\subsection{Step 8: Form the transfer function}
+\paragraph{Step 8: Form the transfer function.}
 
 From \eqref{eq:Ipd-combined} and the result of Step~7:
 \begin{equation}
@@ -254,7 +253,7 @@ From \eqref{eq:Ipd-combined} and the result of Step~7:
 the magnitude here and note the $\SI{180}{\degree}$ phase inversion
 separately.)
 
-\subsection{Step 9: Identify the standard second-order form}
+\paragraph{Step 9: Identify the standard second-order form.}
 
 A standard second-order low-pass transfer function has the form:
 \begin{equation*}
@@ -322,12 +321,11 @@ $R_{\mathrm{f}}\,\omega_{\mathrm{n}}^2$, giving the final form
 \label{sec:butterworth}
 %======================================================================
 
-\subsection{Objective}
-
+\paragraph{Objective.}
 Find the value of $C_{\mathrm{f}}$ that makes the closed-loop response
 maximally flat (Butterworth).
 
-\subsection{Step 1: Butterworth condition}
+\paragraph{Step 1: Butterworth condition.}
 
 A second-order Butterworth (maximally flat magnitude) filter has
 quality factor:
@@ -344,7 +342,7 @@ This is the unique damping ratio that produces zero gain peaking in the
 magnitude response (i.e.\ $|Z_{\mathrm{TI}}(j\omega)|$ is
 monotonically decreasing).
 
-\subsection{Step 2: Translate the condition to circuit parameters}
+\paragraph{Step 2: Translate the condition to circuit parameters.}
 
 The Butterworth condition \eqref{eq:zeta-bw} implies:
 \begin{equation*}
@@ -374,7 +372,7 @@ $[R_{\mathrm{f}}(C_{\mathrm{i}} + C_{\mathrm{f}} + C_{\mathrm{s}})]^2$:
   \label{eq:bw-condition}
 \end{equation}
 
-\subsection{Step 3: Solve for $C_{\mathrm{f}}$}
+\paragraph{Step 3: Solve for $C_{\mathrm{f}}$.}
 
 Define a characteristic capacitance:
 \begin{equation}
@@ -423,7 +421,7 @@ Taking the positive root:
   \label{eq:Cf-exact}
 \end{equation}
 
-\subsection{Validity condition}
+\paragraph{Validity condition.}
 
 \eqref{eq:Cf-exact} requires the argument of the square root to be
 non-negative:
@@ -438,7 +436,7 @@ When this condition is violated, the opamp GBW is too low (or
 $R_{\mathrm{f}}$ too small) to achieve a Butterworth response---the
 circuit is fundamentally underdamped regardless of $C_{\mathrm{f}}$.
 
-\subsection{Relation to the common approximation}
+\paragraph{Relation to the common approximation.}
 
 Many references simplify by assuming
 $\omega_{\mathrm{c}} R_{\mathrm{f}} C_{\mathrm{f}} \gg 1$
